@@ -1,0 +1,2 @@
+sap.ui.define(["sap/fe/test/TemplatePage"],function(e){"use strict";var n={actions:{},assertions:{}};return new e("zgsp26.conf.mng.sdprice.confmngfesdprice::SDPriceConfMain",n)});
+//# sourceMappingURL=SDPriceConfMain.js.map
