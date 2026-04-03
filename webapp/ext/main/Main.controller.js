@@ -238,7 +238,7 @@ sap.ui.define(
             ConfId:      oRequestContext.ConfId || "",
             ReqTitle:    "",
             Status:      sStatus,
-            StatusState: bHasReqId ? "Information" : "None",
+            StatusState: this._statusToState(sStatus),
             Reason:      "",
           }), "request");
 
@@ -247,10 +247,12 @@ sap.ui.define(
           }
 
           if (bHasReqId) {
-            const bIsDraft = sStatus.toUpperCase() === "DRAFT";
+            const bIsDraft    = sStatus.toUpperCase() === "DRAFT";
+            const bIsRejected = sStatus.toUpperCase() === "REJECTED";
+            const bCanEdit    = bIsDraft || bIsRejected;
             oUIModel.setProperty("/requestCreated", true);
-            oUIModel.setProperty("/editMode", bIsDraft);
-            oUIModel.setProperty("/viewOnly", !bIsDraft);
+            oUIModel.setProperty("/editMode", bIsDraft);   // auto-edit only for Draft
+            oUIModel.setProperty("/viewOnly", !bCanEdit);  // lock Edit for Submitted/Approved/etc.
             this._fetchRequestHeader(oRequestContext.ReqId);
             this._fetchReqItem(oRequestContext.ReqId);
             this._loadMainTableWithOverlay(
@@ -1136,6 +1138,18 @@ sap.ui.define(
         },
 
         // ── Private: refresh table binding (show all rows incl. deleted) ────
+        /** Map request status string → SAP UI5 ObjectStatus state */
+        _statusToState: function (sStatus) {
+          switch ((sStatus || "").toUpperCase()) {
+            case "DRAFT":     return "Warning";
+            case "SUBMITTED": return "Information";
+            case "APPROVED":  return "Success";
+            case "REJECTED":  return "Error";
+            case "PROMOTED":  return "Success";
+            default:          return "None";
+          }
+        },
+
         _applyBaseFilter: function () {
           const oBinding = this.byId("priceTable").getBinding("rows");
           if (oBinding) oBinding.filter([]);
