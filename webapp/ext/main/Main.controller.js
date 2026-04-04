@@ -218,6 +218,10 @@ sap.ui.define(
             viewOnly:       false,
             mainLoadFailed: false,
             rowStats:       "",
+            totalCount:  0,
+            createCount: 0,
+            updateCount: 0,
+            deleteCount: 0,
           });
           this.getView().setModel(oUIModel, "ui");
 
@@ -1122,7 +1126,8 @@ sap.ui.define(
 
         // ── Private: compute and display row stats in toolbar ────────────
         _updateRowStats: function () {
-          const aRows    = this.getView().getModel("tableData").getProperty("/rows") || [];
+          const oUI    = this.getView().getModel("ui");
+          const aRows  = this.getView().getModel("tableData").getProperty("/rows") || [];
           const iVisible  = aRows.filter(r => r._state !== "deleted").length;
           const iNew      = aRows.filter(r => r._state === "new").length;
           const iModified = aRows.filter(r => r._state === "modified").length;
@@ -1133,7 +1138,11 @@ sap.ui.define(
           if (iModified) aParts.push(iModified + " modified");
           if (iDeleted)  aParts.push(iDeleted + " to delete");
 
-          this.getView().getModel("ui").setProperty("/rowStats", aParts.join(" · "));
+          oUI.setProperty("/rowStats", aParts.join(" · "));
+          oUI.setProperty("/totalCount",  aRows.length);
+          oUI.setProperty("/createCount", iNew);
+          oUI.setProperty("/updateCount", iModified);
+          oUI.setProperty("/deleteCount", iDeleted);
           this.byId("priceTable").setVisibleRowCount(Math.max(aRows.length, 1));
         },
 
